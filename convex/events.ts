@@ -1,6 +1,5 @@
 import { mutation, query } from "./_generated/server";
 import { v } from "convex/values";
-import { auth } from "./auth";
 
 // Create a new event
 export const createEvent = mutation({
@@ -33,11 +32,11 @@ export const createEvent = mutation({
     currency: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    const user = await auth.getAuthenticatedUser(ctx);
-    if (!user) {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
       throw new Error("User not authenticated");
     }
-    const userId = user.sub;
+    const userId = identity.subject;
 
     // Verify calendar belongs to user
     const calendar = await ctx.db.get(args.calendarId);
@@ -79,11 +78,11 @@ export const getUserEvents = query({
     type: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    const user = await auth.getAuthenticatedUser(ctx);
-    if (!user) {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
       return [];
     }
-    const userId = user.sub;
+    const userId = identity.subject;
 
     let query = ctx.db
       .query("events")
@@ -122,11 +121,11 @@ export const getUpcomingEvents = query({
     limit: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
-    const user = await auth.getAuthenticatedUser(ctx);
-    if (!user) {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
       return [];
     }
-    const userId = user.sub;
+    const userId = identity.subject;
 
     const now = Date.now();
     const daysAhead = args.daysAhead || 7;
@@ -164,11 +163,11 @@ export const updateEvent = mutation({
     completedAt: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
-    const user = await auth.getAuthenticatedUser(ctx);
-    if (!user) {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
       throw new Error("User not authenticated");
     }
-    const userId = user.sub;
+    const userId = identity.subject;
 
     const { eventId, ...updates } = args;
     const event = await ctx.db.get(eventId);
@@ -200,11 +199,11 @@ export const updateEvent = mutation({
 export const deleteEvent = mutation({
   args: { eventId: v.id("events") },
   handler: async (ctx, args) => {
-    const user = await auth.getAuthenticatedUser(ctx);
-    if (!user) {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
       throw new Error("User not authenticated");
     }
-    const userId = user.sub;
+    const userId = identity.subject;
 
     const event = await ctx.db.get(args.eventId);
 
@@ -224,11 +223,11 @@ export const getEventsByType = query({
     limit: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
-    const user = await auth.getAuthenticatedUser(ctx);
-    if (!user) {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
       return { events: [], stats: { total: 0, completed: 0, pending: 0 } };
     }
-    const userId = user.sub;
+    const userId = identity.subject;
 
     const events = await ctx.db
       .query("events")
@@ -261,11 +260,11 @@ export const getBills = query({
     month: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
-    const user = await auth.getAuthenticatedUser(ctx);
-    if (!user) {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
       return [];
     }
-    const userId = user.sub;
+    const userId = identity.subject;
 
     let startDate, endDate;
     if (args.year && args.month) {
@@ -298,11 +297,11 @@ export const getBirthdays = query({
     daysAhead: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
-    const user = await auth.getAuthenticatedUser(ctx);
-    if (!user) {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
       return [];
     }
-    const userId = user.sub;
+    const userId = identity.subject;
 
     const now = Date.now();
     const daysAhead = args.daysAhead || 30;

@@ -1,6 +1,5 @@
 import { mutation, query } from "./_generated/server";
 import { v } from "convex/values";
-import { auth } from "./auth";
 
 // Create a new custom calendar
 export const createCalendar = mutation({
@@ -18,11 +17,11 @@ export const createCalendar = mutation({
     })),
   },
   handler: async (ctx, args) => {
-    const user = await auth.getAuthenticatedUser(ctx);
-    if (!user) {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
       throw new Error("User not authenticated");
     }
-    const userId = user.sub;
+    const userId = identity.subject;
 
     return await ctx.db.insert("customCalendars", {
       userId,
@@ -44,11 +43,11 @@ export const createCalendar = mutation({
 export const getUserCalendars = query({
   args: {},
   handler: async (ctx) => {
-    const user = await auth.getAuthenticatedUser(ctx);
-    if (!user) {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
       return [];
     }
-    const userId = user.sub;
+    const userId = identity.subject;
 
     return await ctx.db
       .query("customCalendars")
@@ -75,11 +74,11 @@ export const updateCalendar = mutation({
     })),
   },
   handler: async (ctx, args) => {
-    const user = await auth.getAuthenticatedUser(ctx);
-    if (!user) {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
       throw new Error("User not authenticated");
     }
-    const userId = user.sub;
+    const userId = identity.subject;
 
     const { calendarId, ...updates } = args;
     const calendar = await ctx.db.get(calendarId);
@@ -101,11 +100,11 @@ export const updateCalendar = mutation({
 export const deleteCalendar = mutation({
   args: { calendarId: v.id("customCalendars") },
   handler: async (ctx, args) => {
-    const user = await auth.getAuthenticatedUser(ctx);
-    if (!user) {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
       throw new Error("User not authenticated");
     }
-    const userId = user.sub;
+    const userId = identity.subject;
 
     const calendar = await ctx.db.get(args.calendarId);
 
@@ -140,11 +139,11 @@ export const deleteCalendar = mutation({
 export const initializeDefaultCalendars = mutation({
   args: {},
   handler: async (ctx) => {
-    const user = await auth.getAuthenticatedUser(ctx);
-    if (!user) {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
       throw new Error("User not authenticated");
     }
-    const userId = user.sub;
+    const userId = identity.subject;
 
     // Check if user already has calendars
     const existingCalendars = await ctx.db
