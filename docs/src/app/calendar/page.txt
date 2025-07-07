@@ -1,0 +1,44 @@
+File: src/app/calendar/page.tsx
+Role: Interactive Calendar Page
+
+Description:
+This file creates a comprehensive and feature-rich calendar page. It goes beyond a simple event display, integrating tasks, reminders, bills, and a unique "Life Templates" system for automating recurring life events. It's designed to be the user's central hub for managing their schedule and life logistics.
+
+Key Responsibilities:
+- Renders a full-page monthly calendar view.
+- Allows users to create, view, edit, and delete events, tasks, and bills.
+- Manages custom, user-created calendars with different colors and categories.
+- Displays upcoming events and pending bills in a quick-access panel.
+- Integrates with the `LifeTemplateManager` to automate the creation of recurring events (e.g., monthly rent, weekly chores).
+- Fetches all calendar-related data from the local database (Dexie).
+
+Imports & Exports:
+- IMPORTS:
+  - React hooks: `useState`, `useEffect`.
+  - UI Components: `Button`, `Card`, `Dialog`, `Tabs`, `Input`, `Select`, etc., from shadcn/ui.
+  - Icons: A large set of icons from `lucide-react` for UI clarity.
+  - Local Database: `localDB` for all CRUD operations on calendars and events.
+  - Components: `LifeTemplateManager`, `ProtectedRoute`.
+  - Next.js: `Link` for navigation.
+- EXPORTS:
+  - `CalendarPage`: The main component, wrapped in `ProtectedRoute`.
+
+Data & State Management:
+- Manages a significant amount of local state, including:
+  - `selectedDate`, `calendarView`.
+  - `calendars`, `events`, `upcomingEvents`, `bills`, `templates` (all fetched from `localDB`).
+  - State for dialogs (`showNewEventDialog`, `showNewCalendarDialog`, etc.).
+  - Form data for creating/editing events and calendars.
+- `useEffect` hook triggers `loadCalendarData` whenever the `userId` or `selectedDate` changes.
+- Contains logic to generate the calendar grid and filter events based on the selected date and visible calendars.
+
+Critical System Connections:
+- UI System: Critical. Renders a core, complex feature of the application.
+- Auth System: Connected via `ProtectedRoute` and `useLocalUser` to ensure it's a protected route.
+- Memory System: Critical. This page is a primary interface for creating and managing a large portion of the user's data (events, calendars, tasks, bills) stored in the local database.
+- Sync System: No direct connection.
+
+Actionable Items:
+- **Default Calendars:** The component has logic to create default "Personal" and "Work" calendars if the user has none. This is great for onboarding.
+- **Life Templates:** The integration with `LifeTemplateManager` is a key feature that needs to be thoroughly tested to ensure event generation works as expected.
+- The component was recently rebuilt to fix numerous TypeScript and logic errors. It needs a full review to confirm all features are working correctly with the local database.

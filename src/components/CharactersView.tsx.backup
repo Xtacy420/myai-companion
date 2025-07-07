@@ -1,0 +1,575 @@
+"use client";
+
+import { useState } from "react";
+import { useQuery, useMutation } from "convex/react";
+import { api } from "../../convex/_generated/api";
+import type { Id } from "../../convex/_generated/dataModel";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import {
+  Users,
+  Plus,
+  MessageCircle,
+  Brain,
+  Heart,
+  BookOpen,
+  Gamepad2,
+  GraduationCap,
+  Briefcase,
+  Coffee,
+  Star,
+  Edit,
+  Trash2,
+  Save,
+  Sparkles,
+  User
+} from "lucide-react";
+
+interface CharactersViewProps {
+  userId: Id<"users">;
+}
+
+export default function CharactersView({ userId }: CharactersViewProps) {
+  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
+  const [selectedCharacter, setSelectedCharacter] = useState<any>(null);
+
+  // Form state
+  const [name, setName] = useState("");
+  const [description, setDescription] = useState("");
+  const [background, setBackground] = useState("");
+  const [role, setRole] = useState("");
+  const [traits, setTraits] = useState<string[]>([]);
+  const [tone, setTone] = useState("friendly");
+  const [style, setStyle] = useState("conversational");
+  const [expertise, setExpertise] = useState<string[]>([]);
+  const [purposeTags, setPurposeTags] = useState<string[]>([]);
+  const [systemPrompt, setSystemPrompt] = useState("");
+
+  const characters = useQuery(api.characters.getCharactersByUser, { userId });
+  const createCharacter = useMutation(api.characters.createCharacter);
+  const updateCharacter = useMutation(api.characters.updateCharacter);
+  const deleteCharacter = useMutation(api.characters.deleteCharacter);
+
+  const roleOptions = [
+    { value: "coach", label: "Life Coach", icon: Star, desc: "Motivational guidance and goal setting" },
+    { value: "therapist", label: "Therapist", icon: Heart, desc: "Emotional support and mental health" },
+    { value: "mentor", label: "Mentor", icon: GraduationCap, desc: "Wisdom and career guidance" },
+    { value: "friend", label: "Friend", icon: Coffee, desc: "Casual conversation and companionship" },
+    { value: "teacher", label: "Teacher", icon: BookOpen, desc: "Educational and learning support" },
+    { value: "creative", label: "Creative Partner", icon: Sparkles, desc: "Brainstorming and artistic collaboration" },
+    { value: "professional", label: "Professional", icon: Briefcase, desc: "Business and work-related advice" },
+    { value: "storyteller", label: "Storyteller", icon: Gamepad2, desc: "Narrative and entertainment" },
+  ];
+
+  const traitOptions = [
+    "empathetic", "analytical", "creative", "patient", "energetic", "wise",
+    "humorous", "supportive", "direct", "gentle", "optimistic", "realistic",
+    "curious", "inspiring", "practical", "imaginative", "reliable", "adventurous"
+  ];
+
+  const toneOptions = [
+    { value: "friendly", label: "Friendly" },
+    { value: "professional", label: "Professional" },
+    { value: "empathetic", label: "Empathetic" },
+    { value: "playful", label: "Playful" },
+    { value: "wise", label: "Wise" },
+    { value: "casual", label: "Casual" },
+  ];
+
+  const styleOptions = [
+    { value: "conversational", label: "Conversational" },
+    { value: "coaching", label: "Coaching" },
+    { value: "storytelling", label: "Storytelling" },
+    { value: "analytical", label: "Analytical" },
+    { value: "supportive", label: "Supportive" },
+    { value: "creative", label: "Creative" },
+  ];
+
+  const purposeTagOptions = [
+    "emotional-support", "productivity", "creativity", "learning", "fitness",
+    "relationships", "career", "personal-growth", "entertainment", "mindfulness",
+    "problem-solving", "planning", "storytelling", "journaling", "reflection"
+  ];
+
+  const expertiseOptions = [
+    "psychology", "business", "technology", "health", "fitness", "nutrition",
+    "relationships", "creativity", "writing", "productivity", "mindfulness",
+    "education", "science", "arts", "music", "travel", "cooking", "finance"
+  ];
+
+  const resetForm = () => {
+    setName("");
+    setDescription("");
+    setBackground("");
+    setRole("");
+    setTraits([]);
+    setTone("friendly");
+    setStyle("conversational");
+    setExpertise([]);
+    setPurposeTags([]);
+    setSystemPrompt("");
+    setSelectedCharacter(null);
+  };
+
+  const openCreateDialog = () => {
+    resetForm();
+    setIsCreateDialogOpen(true);
+  };
+
+  const openEditDialog = (character: any) => {
+    setSelectedCharacter(character);
+    setName(character.name);
+    setDescription(character.description || "");
+    setBackground(character.background || "");
+    setRole(character.role || "");
+    setTraits(character.personality.traits || []);
+    setTone(character.personality.tone || "friendly");
+    setStyle(character.personality.style || "conversational");
+    setExpertise(character.personality.expertise || []);
+    setPurposeTags(character.purposeTags || []);
+    setSystemPrompt(character.systemPrompt || "");
+    setIsCreateDialogOpen(true);
+  };
+
+  const handleSave = async () => {
+    if (!name.trim()) return;
+
+    const characterData = {
+      name: name.trim(),
+      description: description.trim() || undefined,
+      background: background.trim() || undefined,
+      role: role || undefined,
+      personality: {
+        traits,
+        tone,
+        style,
+        expertise: expertise.length > 0 ? expertise : undefined,
+      },
+      purposeTags,
+      systemPrompt: systemPrompt.trim() || generateSystemPrompt(),
+    };
+
+    try {
+      if (selectedCharacter) {
+        await updateCharacter({
+          characterId: selectedCharacter._id,
+          ...characterData,
+        });
+      } else {
+        await createCharacter({
+          userId,
+          ...characterData,
+        });
+      }
+      setIsCreateDialogOpen(false);
+      resetForm();
+    } catch (error) {
+      console.error("Failed to save character:", error);
+    }
+  };
+
+  const handleDelete = async (characterId: Id<"characters">) => {
+    if (confirm("Are you sure you want to delete this character? This will also delete all conversations with them.")) {
+      try {
+        await deleteCharacter({ characterId });
+      } catch (error) {
+        console.error("Failed to delete character:", error);
+      }
+    }
+  };
+
+  const generateSystemPrompt = () => {
+    const selectedRole = roleOptions.find(r => r.value === role);
+    const roleDesc = selectedRole?.desc || "helpful assistant";
+    const traitList = traits.join(", ");
+    const expertiseList = expertise.join(", ");
+
+    return `You are ${name}, a ${tone} and ${style} AI character who serves as a ${selectedRole?.label || "assistant"}.
+
+Your role: ${roleDesc}
+
+Personality traits: You are ${traitList || "helpful, thoughtful, and engaging"}.
+
+${expertise.length > 0 ? `Areas of expertise: ${expertiseList}` : ""}
+
+${background ? `Background: ${background}` : ""}
+
+${description ? `Additional context: ${description}` : ""}
+
+Always stay in character and respond according to your personality and role. Be authentic to your defined traits while being helpful and engaging.`;
+  };
+
+  const toggleArrayItem = (item: string, array: string[], setArray: (arr: string[]) => void) => {
+    const newArray = array.includes(item)
+      ? array.filter(i => i !== item)
+      : [...array, item];
+    setArray(newArray);
+  };
+
+  const getCharacterIcon = (characterRole: string) => {
+    const roleOption = roleOptions.find(r => r.value === characterRole);
+    return roleOption?.icon || User;
+  };
+
+  return (
+    <div className="flex flex-col h-full">
+      {/* Header */}
+      <div className="bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm border-b border-slate-200 dark:border-slate-700 p-6">
+        <div className="flex items-center justify-between mb-4">
+          <div>
+            <h2 className="text-2xl font-bold text-slate-800 dark:text-slate-200">AI Characters</h2>
+            <p className="text-slate-600 dark:text-slate-400">
+              Create custom AI personalities for different purposes
+            </p>
+          </div>
+          <div className="flex items-center gap-4">
+            {characters && (
+              <div className="text-center">
+                <div className="text-2xl font-bold text-purple-600">
+                  {characters.length}
+                </div>
+                <div className="text-sm text-slate-600 dark:text-slate-400">
+                  Characters
+                </div>
+              </div>
+            )}
+            <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
+              <DialogTrigger asChild>
+                <Button className="gap-2" onClick={openCreateDialog}>
+                  <Plus className="w-4 h-4" />
+                  Create Character
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-4xl max-h-[85vh] overflow-y-auto">
+                <DialogHeader>
+                  <DialogTitle>
+                    {selectedCharacter ? "Edit Character" : "Create New Character"}
+                  </DialogTitle>
+                </DialogHeader>
+                <div className="space-y-6 py-4">
+                  {/* Basic Info */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <Label className="text-base font-medium">Character Name</Label>
+                      <Input
+                        placeholder="e.g., Dr. Sarah, Coach Mike, Luna"
+                        value={name}
+                        onChange={(e) => setName(e.target.value)}
+                        className="mt-1"
+                      />
+                    </div>
+                    <div>
+                      <Label className="text-base font-medium">Role</Label>
+                      <div className="mt-2 grid grid-cols-2 gap-2">
+                        {roleOptions.map((option) => {
+                          const Icon = option.icon;
+                          return (
+                            <Button
+                              key={option.value}
+                              variant={role === option.value ? "default" : "outline"}
+                              size="sm"
+                              onClick={() => setRole(option.value)}
+                              className="justify-start gap-2"
+                            >
+                              <Icon className="w-3 h-3" />
+                              {option.label}
+                            </Button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <Label className="text-base font-medium">Description</Label>
+                    <Textarea
+                      placeholder="Brief description of your character's purpose and personality..."
+                      value={description}
+                      onChange={(e) => setDescription(e.target.value)}
+                      className="mt-1"
+                      rows={2}
+                    />
+                  </div>
+
+                  <div>
+                    <Label className="text-base font-medium">Background Story</Label>
+                    <Textarea
+                      placeholder="Optional background, history, or context for your character..."
+                      value={background}
+                      onChange={(e) => setBackground(e.target.value)}
+                      className="mt-1"
+                      rows={3}
+                    />
+                  </div>
+
+                  {/* Personality */}
+                  <div>
+                    <Label className="text-base font-medium mb-3 block">
+                      Personality Traits ({traits.length} selected)
+                    </Label>
+                    <div className="flex flex-wrap gap-2">
+                      {traitOptions.map((trait) => (
+                        <Badge
+                          key={trait}
+                          variant={traits.includes(trait) ? "default" : "outline"}
+                          className="cursor-pointer"
+                          onClick={() => toggleArrayItem(trait, traits, setTraits)}
+                        >
+                          {trait}
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Tone & Style */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <Label className="text-base font-medium">Tone</Label>
+                      <div className="mt-2 flex flex-wrap gap-2">
+                        {toneOptions.map((option) => (
+                          <Button
+                            key={option.value}
+                            variant={tone === option.value ? "default" : "outline"}
+                            size="sm"
+                            onClick={() => setTone(option.value)}
+                          >
+                            {option.label}
+                          </Button>
+                        ))}
+                      </div>
+                    </div>
+                    <div>
+                      <Label className="text-base font-medium">Style</Label>
+                      <div className="mt-2 flex flex-wrap gap-2">
+                        {styleOptions.map((option) => (
+                          <Button
+                            key={option.value}
+                            variant={style === option.value ? "default" : "outline"}
+                            size="sm"
+                            onClick={() => setStyle(option.value)}
+                          >
+                            {option.label}
+                          </Button>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Expertise */}
+                  <div>
+                    <Label className="text-base font-medium mb-3 block">
+                      Areas of Expertise ({expertise.length} selected)
+                    </Label>
+                    <div className="flex flex-wrap gap-2">
+                      {expertiseOptions.map((expert) => (
+                        <Badge
+                          key={expert}
+                          variant={expertise.includes(expert) ? "default" : "outline"}
+                          className="cursor-pointer"
+                          onClick={() => toggleArrayItem(expert, expertise, setExpertise)}
+                        >
+                          {expert}
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Purpose Tags */}
+                  <div>
+                    <Label className="text-base font-medium mb-3 block">
+                      Purpose Tags ({purposeTags.length} selected)
+                    </Label>
+                    <div className="flex flex-wrap gap-2">
+                      {purposeTagOptions.map((tag) => (
+                        <Badge
+                          key={tag}
+                          variant={purposeTags.includes(tag) ? "default" : "outline"}
+                          className="cursor-pointer"
+                          onClick={() => toggleArrayItem(tag, purposeTags, setPurposeTags)}
+                        >
+                          {tag}
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* System Prompt */}
+                  <div>
+                    <Label className="text-base font-medium">Custom System Prompt (Optional)</Label>
+                    <Textarea
+                      placeholder="Leave empty to auto-generate based on settings above..."
+                      value={systemPrompt}
+                      onChange={(e) => setSystemPrompt(e.target.value)}
+                      className="mt-1"
+                      rows={4}
+                    />
+                    <p className="text-xs text-slate-500 mt-1">
+                      This defines how your character behaves. If empty, it will be generated automatically.
+                    </p>
+                  </div>
+
+                  {/* Action Buttons */}
+                  <div className="flex justify-end gap-2 pt-4 border-t">
+                    <Button
+                      variant="outline"
+                      onClick={() => setIsCreateDialogOpen(false)}
+                    >
+                      Cancel
+                    </Button>
+                    <Button
+                      onClick={handleSave}
+                      disabled={!name.trim()}
+                      className="gap-2"
+                    >
+                      <Save className="w-4 h-4" />
+                      {selectedCharacter ? "Update" : "Create"} Character
+                    </Button>
+                  </div>
+                </div>
+              </DialogContent>
+            </Dialog>
+          </div>
+        </div>
+      </div>
+
+      {/* Characters List */}
+      <ScrollArea className="flex-1 p-6">
+        <div className="space-y-4 max-w-6xl mx-auto">
+          {!characters ? (
+            <div className="text-center py-8">
+              <div className="animate-pulse">Loading characters...</div>
+            </div>
+          ) : characters.length === 0 ? (
+            <div className="text-center py-12">
+              <Users className="w-12 h-12 text-slate-400 mx-auto mb-4" />
+              <h3 className="text-lg font-medium text-slate-600 dark:text-slate-400 mb-2">
+                No characters created yet
+              </h3>
+              <p className="text-slate-500 dark:text-slate-500 mb-4">
+                Create your first AI character to get started with personalized conversations
+              </p>
+              <Button onClick={openCreateDialog} className="gap-2">
+                <Plus className="w-4 h-4" />
+                Create First Character
+              </Button>
+            </div>
+          ) : (
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+              {characters.map((character) => {
+                const Icon = getCharacterIcon(character.role);
+                return (
+                  <Card key={character._id} className="hover:shadow-md transition-shadow">
+                    <CardHeader className="pb-3">
+                      <div className="flex items-start justify-between">
+                        <div className="flex items-center gap-3">
+                          <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-blue-600 rounded-full flex items-center justify-center">
+                            <Icon className="w-6 h-6 text-white" />
+                          </div>
+                          <div>
+                            <CardTitle className="text-lg text-slate-800 dark:text-slate-200">
+                              {character.name}
+                            </CardTitle>
+                            {character.role && (
+                              <Badge variant="secondary" className="mt-1">
+                                {roleOptions.find(r => r.value === character.role)?.label || character.role}
+                              </Badge>
+                            )}
+                          </div>
+                        </div>
+                        <div className="flex gap-1">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => openEditDialog(character)}
+                          >
+                            <Edit className="w-4 h-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleDelete(character._id)}
+                            className="text-red-600 hover:text-red-700"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        </div>
+                      </div>
+                    </CardHeader>
+                    <CardContent className="space-y-3">
+                      {character.description && (
+                        <p className="text-slate-600 dark:text-slate-400 text-sm">
+                          {character.description}
+                        </p>
+                      )}
+
+                      {/* Personality Traits */}
+                      {character.personality.traits && character.personality.traits.length > 0 && (
+                        <div>
+                          <h4 className="font-medium text-slate-700 dark:text-slate-300 mb-2 text-sm">
+                            Personality
+                          </h4>
+                          <div className="flex flex-wrap gap-1">
+                            {character.personality.traits.slice(0, 3).map((trait: string, index: number) => (
+                              <Badge key={`trait-${character._id}-${index}`} variant="outline" className="text-xs">
+                                {trait}
+                              </Badge>
+                            ))}
+                            {character.personality.traits.length > 3 && (
+                              <Badge variant="outline" className="text-xs">
+                                +{character.personality.traits.length - 3} more
+                              </Badge>
+                            )}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Purpose Tags */}
+                      {character.purposeTags && character.purposeTags.length > 0 && (
+                        <div>
+                          <h4 className="font-medium text-slate-700 dark:text-slate-300 mb-2 text-sm">
+                            Purpose
+                          </h4>
+                          <div className="flex flex-wrap gap-1">
+                            {character.purposeTags.slice(0, 2).map((tag: string, index: number) => (
+                              <Badge key={`purpose-${character._id}-${index}`} variant="secondary" className="text-xs">
+                                {tag}
+                              </Badge>
+                            ))}
+                            {character.purposeTags.length > 2 && (
+                              <Badge variant="secondary" className="text-xs">
+                                +{character.purposeTags.length - 2} more
+                              </Badge>
+                            )}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Chat Button */}
+                      <Button className="w-full gap-2 mt-4" size="sm">
+                        <MessageCircle className="w-4 h-4" />
+                        Start Conversation
+                      </Button>
+
+                      {character.conversationCount && character.conversationCount > 0 && (
+                        <p className="text-xs text-slate-500 text-center">
+                          {character.conversationCount} conversations
+                        </p>
+                      )}
+                    </CardContent>
+                  </Card>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      </ScrollArea>
+    </div>
+  );
+}

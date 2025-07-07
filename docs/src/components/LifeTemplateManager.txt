@@ -1,0 +1,45 @@
+File: src/components/LifeTemplateManager.tsx
+Role: Recurring Event Automation Manager
+
+Description:
+This component manages "Life Templates," a powerful feature for automating the creation of recurring events like bills, chores, or appointments. Users can define a template once (e.g., "Monthly Rent Bill") and then use it to generate multiple future events in their calendar. This component has a mix of old Convex code and new local-first code.
+
+Key Responsibilities:
+- Displays a list of all created life templates.
+- Provides a dialog with a multi-tab form to create or edit a template, including:
+  - Basic Info: Name, category, description, and the title/type of the event it will create.
+  - Recurring Settings: Frequency (daily, weekly, monthly), interval, and specific days.
+  - Advanced Settings: Default reminders and metadata (e.g., bill amount).
+- Allows users to activate or deactivate templates.
+- Provides a second dialog to "automate" a template, which generates a specified number of events in a selected calendar based on the template's rules.
+
+Imports & Exports:
+- IMPORTS:
+  - React hooks: `useState`, `useEffect`.
+  - **[OUTDATED]** Convex hooks: `useQuery`, `useMutation`, `api`.
+  - Hooks: `useUser`, `useLocalUser`.
+  - Local Database: `localDB`.
+  - UI Components: `Button`, `Card`, `Dialog`, `Input`, `Select`, `Tabs`.
+- EXPORTS:
+  - `LifeTemplateManager`: The main component.
+
+Data & State Management:
+- **[CONFLICT]** This component suffers from the same dual-backend issue as other components.
+  - It fetches `calendars` from Convex (`useQuery(api.calendars.getUserCalendars)`).
+  - It has functions (`loadTemplates`, `handleSaveTemplate`) that interact with `localDB`.
+  - It uses mutations (`createTemplate`, `updateTemplate`, etc.) that target the **Convex backend**.
+- Manages complex local state for the template creation form (`formData`) and the automation settings dialog.
+
+Critical System Connections:
+- UI System: Renders a complex and powerful settings interface.
+- Auth System: Uses both the old Convex `userId` and the new local `userId`.
+- Memory System: **[MIGRATION REQUIRED]** The component is fundamentally broken. It reads and writes to both Convex and `localDB`, which will lead to inconsistent and incorrect behavior.
+- Calendar System: Critically linked. Its primary purpose is to create events that will appear on the calendar page.
+
+Actionable Items:
+- **High Priority:** This component needs a complete refactor to use only the local-first architecture.
+- **Remove All Convex Code:** All `useQuery` and `useMutation` hooks must be deleted.
+- **Unify Data Flow:** All data operations (for templates, calendars, and creating events) must go through `localDB`.
+- **Fix Event Creation:** The `createEventsFromTemplate` mutation needs to be replaced with a local function that calls `localDB.createEvent` in a loop based on the template's recurring logic.
+- **Fix Calendar Fetching:** The component should fetch calendars from `localDB.getUserCalendars(userId)` instead of the Convex query.
+- Consolidate the multiple, conflicting handler functions into a single set that uses `localDB`.

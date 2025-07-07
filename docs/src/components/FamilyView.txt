@@ -1,0 +1,42 @@
+File: src/components/FamilyView.tsx
+Role: Family and Friends Relationship Manager
+
+Description:
+This component allows users to create a personal database of their family members and friends. It provides a way to store names, relationships, birthdays, and other notes about the important people in their lives. This component is partially migrated and contains conflicting code from both the old Convex and new local-first architectures.
+
+Key Responsibilities:
+- Displays a list of all added family members and friends in a card-based layout.
+- Provides a dialog form to add a new person or edit an existing one.
+- The form captures the person's name, relationship, birthday, characteristics, and general notes.
+- Shows upcoming birthdays to the user.
+- Handles creating, updating, and deleting these records.
+
+Imports & Exports:
+- IMPORTS:
+  - React hooks: `useState`, `useEffect`.
+  - **[OUTDATED]** Convex hooks: `useQuery`, `useMutation`, and `api`.
+  - UI Components: `Card`, `Button`, `Dialog`, `Input`, `Textarea`, `Badge`.
+  - Hooks: `useLocalUser`.
+  - Local Database: `localDB`.
+- EXPORTS:
+  - `FamilyView`: The main component.
+
+Data & State Management:
+- **[CONFLICT]** This component fetches data from and writes data to two different backends, which will cause data inconsistency.
+  - It uses `useQuery` to fetch `familyMembers` and `upcomingBirthdays` from **Convex**.
+  - It also has `loadFamilyData`, `handleUpdateFamilyMember`, etc., functions that interact with the **localDB**.
+- Manages local state for the dialog form inputs (name, relationship, birthday, etc.).
+
+Critical System Connections:
+- UI System: Renders the interface for managing personal relationships.
+- Auth System: Uses both the old Convex `userId` and the new local `userId`.
+- Memory System: **[MIGRATION REQUIRED]** This component is critically broken due to its dual-backend nature. It directly interacts with both the old and new memory systems, which is a major issue.
+- Sync System: No direct connection.
+
+Actionable Items:
+- **High Priority:** This component must be urgently refactored to be a single-source-of-truth component.
+- **Remove all Convex code:** All `useQuery` and `useMutation` hooks must be deleted.
+- **Unify Data Flow:** All data fetching and manipulation must go through `localDB` exclusively.
+- **Fix `upcomingBirthdays`:** The `loadFamilyData` function currently sets `upcomingBirthdays` to an empty array. Logic needs to be added to `localDB` to calculate upcoming birthdays from the stored family members, and this component needs to call it.
+- **Consolidate Handlers:** There are duplicate handler functions (e.g., `handleSubmit` for Convex and `handleCreateFamilyMember` for localDB). These need to be merged into a single set of handlers that only use `localDB`.
+- Update the `userId` prop to be a `string`.

@@ -1,0 +1,42 @@
+File: src/components/CharacterCreation.tsx
+Role: Custom AI Character Management
+
+Description:
+This component allows users to create, edit, and manage custom AI "characters" that they can chat with. It provides a detailed form for defining a character's name, avatar, personality, and backstory. This is a core feature for personalizing the user's chat experience.
+
+Key Responsibilities:
+- Renders a list of the user's existing characters.
+- Provides a dialog form to create a new character or edit an existing one.
+- The creation form includes fields for:
+  - Name, description, avatar.
+  - Personality: Tone, response style, traits, and expertise.
+  - Backstory (for providing context to the AI).
+- Handles saving new characters and updating existing ones in the local database.
+- Allows for deletion of characters.
+- Communicates the selected character back to the parent component (the Chat page) via props.
+
+Imports & Exports:
+- IMPORTS:
+  - React hooks: `useState`, `useEffect`.
+  - UI Components: `Button`, `Card`, `Dialog`, `Input`, `Select`, `Badge`, `Textarea`.
+  - Hooks: `useLocalUser` to get the current `userId`.
+  - Local Database: `localDB` for all character-related CRUD operations.
+- EXPORTS:
+  - `CharacterCreation`: The main component.
+
+Data & State Management:
+- Manages local state for the list of characters, loading status, dialog visibility, and the form data for a new/editing character.
+- `useEffect` hook loads the user's characters from `localDB` when the component mounts or `userId` changes.
+- `handleSaveCharacter` function creates or updates a character record in `localDB`.
+- `handleDeleteCharacter` function removes a character and its associated conversations from `localDB`.
+
+Critical System Connections:
+- UI System: Critical. Provides the interface for a major application feature.
+- Auth System: Connected via `useLocalUser` to ensure characters are associated with the correct user.
+- Memory System: Critical. This component is the primary interface for creating and managing character data, which is a key part of the user's memory stored in the local database.
+- Chat System: Tightly coupled. The `onCharacterSelect` prop allows this component to control which character the user is chatting with on the main chat page.
+- Sync System: No direct connection.
+
+Actionable Items:
+- The component appears to be fully migrated to the local-first architecture and uses `localDB` correctly.
+- The preset options (tones, styles, traits, expertise) are hardcoded. This is acceptable, but they could potentially be made configurable in the future.

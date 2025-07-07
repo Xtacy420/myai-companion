@@ -1,0 +1,44 @@
+File: src/components/CloudSyncSettings.tsx
+Role: Cloud Synchronization Management
+
+Description:
+This component provides the UI for managing optional cloud synchronization. It allows users to connect to a cloud provider (like iCloud or Google Drive) to back up and sync their locally stored data across devices. This component is currently using outdated Convex hooks and is not functional in the local-first architecture.
+
+Key Responsibilities:
+- Displays the current cloud sync status (enabled/disabled, provider, last sync time).
+- Provides a switch to enable or disable cloud sync.
+- Renders a dialog for selecting a cloud provider (iCloud, Google Drive) and initiating the connection process.
+- Shows feedback to the user during the sync process (syncing, success, error).
+- Includes a button for manual synchronization.
+
+Imports & Exports:
+- IMPORTS:
+  - React hooks: `useState`, `useEffect`.
+  - **[OUTDATED]** Convex hooks: `useQuery`, `useMutation`, and `api`.
+  - UI Components: `Button`, `Card`, `Dialog`, `Switch`.
+  - Hooks: `useLocalUser` (present but not fully utilized).
+  - Local Database: `localDB` (present but not fully utilized).
+- EXPORTS:
+  - `CloudSyncSettings`: The main component.
+
+Data & State Management:
+- Manages local state for dialog visibility, connection status, and sync status.
+- Fetches the user's current sync configuration from the **Convex database** using `useQuery`.
+- Uses the `updateCloudSync` mutation on the **Convex backend** to enable/disable sync and update provider information.
+
+Critical System Connections:
+- UI System: Renders the settings interface for a major potential feature.
+- Auth System: Uses the outdated Convex `userId` (`Id<"users">`).
+- Memory System: **[MIGRATION REQUIRED]** This component is fundamentally tied to the old Convex backend.
+- Sync System: **[MIGRATION REQUIRED]** This IS the settings interface for the sync system. To make this functional, it needs a complete rewrite:
+  1. The concept of "sync" must be redefined for a local-first app. It likely means exporting the encrypted local database to a user-controlled cloud storage provider.
+  2. All `useQuery` and `useMutation` calls must be removed.
+  3. The `handleConnectProvider` function needs to be rewritten to handle the new export/import logic, potentially using the chosen provider's API.
+  4. The `localDB.exportDatabase()` and `localDB.importDatabase()` methods will be critical here.
+
+Actionable Items:
+- **High Priority:** This component is entirely non-functional and based on the old cloud architecture. It needs a complete conceptual and technical overhaul.
+- Define the user flow for "cloud sync" in a local-first context (e.g., is it manual backup/restore, or something more automated?).
+- Remove all Convex dependencies.
+- Implement the logic to connect to cloud storage providers (this is a significant task, likely requiring OAuth and provider-specific SDKs).
+- Connect the UI to the `localDB.exportDatabase()` and `localDB.importDatabase()` methods.

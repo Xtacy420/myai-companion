@@ -1,0 +1,36 @@
+File: src/app/layout.tsx
+Role: Root Application Layout
+
+Description:
+This is the main layout file for the entire Next.js application. It defines the `<html>`, `<head>`, and `<body>` tags that wrap every page, ensuring a consistent structure and style across the app.
+
+Key Responsibilities:
+- Sets up global fonts (Geist Sans and Mono).
+- Imports and applies global CSS styles from `globals.css`.
+- Defines application-wide metadata for SEO (title, description).
+- Configures the viewport for responsive design and mobile web app capabilities.
+- Wraps all page content with necessary providers.
+
+Imports & Exports:
+- IMPORTS:
+  - `Geist`, `Geist_Mono`: Custom fonts.
+  - `globals.css`: Global stylesheet.
+  - `ConvexClientProvider`: **[OUTDATED]** A wrapper for the now-removed Convex cloud backend.
+  - `Script`: Next.js component for loading external scripts.
+- EXPORTS:
+  - `metadata`: Default SEO metadata.
+  - `viewport`: Viewport settings for responsiveness.
+  - `RootLayout`: The main layout component.
+
+Data & State Management:
+- This file does not directly manage application state.
+- It previously integrated `ConvexClientProvider`, which managed the connection to the cloud database. This is no longer in use.
+
+Critical System Connections:
+- UI System: Absolutely critical. This file is the foundation for the entire UI.
+- Auth System: **[CLEANUP REQUIRED]** Contains the `ConvexClientProvider`, a leftover from the old authentication system. This needs to be removed and replaced with any necessary providers for the new local-first authentication system.
+- Memory & Sync: No direct connection, but the outdated provider was the entry point for these systems.
+
+Actionable Items:
+- **High Priority:** Remove the `ConvexClientProvider`. It is a non-functional leftover from the previous architecture and could cause issues.
+- Confirm if a new provider is needed for the local-first architecture (e.g., for global state management or database access).

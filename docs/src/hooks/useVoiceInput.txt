@@ -1,0 +1,38 @@
+File: src/hooks/useVoiceInput.ts
+Role: Voice-to-Text Conversion Hook
+
+Description:
+This is a custom React hook that encapsulates the logic for using the browser's Web Speech API to convert voice input into text. It provides a simple interface for starting, stopping, and handling the results of speech recognition, making it easy to integrate voice input into any component.
+
+Key Responsibilities:
+- Checks if the browser supports the Web Speech API (`SpeechRecognition` or `webkitSpeechRecognition`).
+- Manages the state of the voice recognition process, including `isListening`, `transcript`, `interimTranscript`, and `error`.
+- Provides functions to `startListening`, `stopListening`, and `toggleListening`.
+- Handles the lifecycle events of the `SpeechRecognition` object (`onstart`, `onresult`, `onend`, `onerror`).
+- Exposes callbacks (`onResult`, `onInterimResult`, etc.) that can be provided as options, allowing parent components to react to voice events.
+
+Imports & Exports:
+- IMPORTS:
+  - React hooks: `useState`, `useEffect`, `useCallback`, `useRef`.
+- EXPORTS:
+  - `useVoiceInput`: The custom hook.
+
+Data & State Management:
+- `isListening`: Boolean state to track if the microphone is currently active.
+- `isSupported`: Boolean state to indicate if the browser has the required API.
+- `transcript`: String state that stores the final, confirmed transcript of the user's speech.
+- `interimTranscript`: String state that stores the in-progress, unconfirmed transcript.
+- `error`: String state to hold any error messages from the API.
+- `recognitionRef`: A `useRef` to hold the persistent `SpeechRecognition` instance across re-renders.
+
+Critical System Connections:
+- UI System: Provides the logic that powers the microphone button in the chat interface. It doesn't render any UI itself but is critical for the voice input feature.
+- Auth System: No connection.
+- Memory System: No direct connection. The parent component (the Chat page) is responsible for taking the transcript from this hook and saving it as a message.
+- Sync System: No connection.
+
+Actionable Items:
+- This hook is well-structured and self-contained.
+- It correctly handles the vendor prefix (`webkitSpeechRecognition`) for better browser compatibility.
+- The use of TypeScript interfaces for the Web Speech API events (`SpeechRecognitionEvent`, etc.) is good practice and improves type safety.
+- The `options` parameter with callbacks makes the hook very flexible and reusable.

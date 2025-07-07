@@ -1,0 +1,34 @@
+File: src/components/ProtectedRoute.tsx
+Role: Authentication Gatekeeper
+
+Description:
+This is a crucial client-side component that acts as a gatekeeper for protected routes. It wraps pages or layouts that should only be accessible to authenticated users. If a user is not logged in, it redirects them to the home page.
+
+Key Responsibilities:
+- Checks the user's authentication status using the `useLocalUser` hook.
+- While checking the authentication status (`isLoading`), it displays a branded loading screen.
+- If the user is not authenticated (`!isAuthenticated`), it redirects them to the `/home` page using the Next.js `useRouter` hook.
+- If the user is authenticated, it renders the `children` props, allowing the user to see the protected page content.
+
+Imports & Exports:
+- IMPORTS:
+  - React hooks: `useEffect`.
+  - Next.js: `useRouter` for navigation.
+  - Hooks: `useLocalUser` to get the authentication state.
+  - UI Components: `Loader2`, `Sparkles` for the loading indicator.
+- EXPORTS:
+  - `ProtectedRoute`: The main component.
+
+Data & State Management:
+- It relies entirely on the state provided by the `useLocalUser` hook, specifically the `isAuthenticated` and `isLoading` boolean values.
+- It uses `useEffect` to react to changes in these values, triggering a redirect if necessary.
+
+Critical System Connections:
+- UI System: Controls the visibility of major application sections and provides the main loading state UI.
+- Auth System: **Absolutely critical.** This component is the primary enforcer of the local-first authentication system on the client side. It ensures that unauthenticated users cannot access sensitive parts of the application.
+- Memory & Sync Systems: Indirectly protects these systems by ensuring only authenticated users can access the components that interact with them.
+
+Actionable Items:
+- This component is well-implemented and correctly uses the `useLocalUser` hook for the local-first architecture.
+- The redirect path is hardcoded to `/home`. This is appropriate for this application but is something to be aware of if the public-facing page structure changes.
+- The loading screen is a nice touch for user experience.

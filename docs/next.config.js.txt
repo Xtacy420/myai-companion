@@ -1,0 +1,28 @@
+File: next.config.js
+Role: Next.js Application Configuration
+
+Description:
+This file configures the behavior of the Next.js framework for the MyAi Companion application. It controls build settings, image optimization, and other experimental features.
+
+Key Configurations:
+- `output: 'export'` & `distDir: 'out'`:
+  - These settings configure the project for a **static export**. This means `next build` will generate a folder of static HTML, CSS, and JS files that can be hosted on any static hosting service.
+  - **This conflicts with the `netlify.toml` file**, which is set up for a dynamic server-side rendered (SSR) deployment.
+
+- `eslint: { ignoreDuringBuilds: true }` & `typescript: { ignoreBuildErrors: true }`:
+  - These settings tell the build process to ignore any ESLint or TypeScript errors. This is generally used as a temporary measure to get a project to build, but it is **highly discouraged** for production as it can hide critical bugs.
+
+- `images: { ... }`:
+  - `unoptimized: true`: Disables Next.js's built-in image optimization. This is often necessary for static exports when not using a compatible hosting provider like Vercel.
+  - `domains` & `remotePatterns`: Whitelists external domains from which the application is allowed to load images.
+
+Critical System Connections:
+- Build & Deployment System: **Absolutely critical.** This file directly controls how the application is built and what kind of output is generated.
+
+Actionable Items:
+- **High Priority: Deployment Conflict:** There is a major conflict between this file and `netlify.toml`.
+  - `next.config.js` is set for a **static export** (`output: 'export'`).
+  - `netlify.toml` is configured to use the Next.js plugin for a **dynamic deployment**.
+  - This conflict must be resolved. Given the app's dynamic nature (API routes, etc.), the `output: 'export'` and `distDir: 'out'` lines should likely be **removed** to align with a dynamic deployment strategy.
+
+- **High Priority: Error Ignoring:** The `ignoreDuringBuilds` flags for both ESLint and TypeScript should be removed. The underlying errors they are hiding need to be fixed to ensure code quality and prevent runtime bugs. Leaving these in is a significant risk.

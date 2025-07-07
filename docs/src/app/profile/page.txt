@@ -1,0 +1,42 @@
+File: src/app/profile/page.tsx
+Role: User Profile and Data Management Hub
+
+Description:
+This page serves as the user's central profile area. It displays user information, provides high-level statistics about their data, and acts as a navigation hub to more detailed views for managing memories and family/friend relationships. It was partially migrated from Convex and still contains some outdated code.
+
+Key Responsibilities:
+- Displays the user's avatar, name, email, and member-since date.
+- Shows key statistics (memories stored, conversations, family members, check-ins).
+- Provides navigation to the `MemoriesView` and `FamilyView` components.
+- Contains a section for `ExportData`, allowing users to download their information.
+- Fetches and displays recent memories and family members as a quick preview.
+
+Imports & Exports:
+- IMPORTS:
+  - React hooks: `useState`, `useEffect`.
+  - UI Components: `Button`, `Card`, `Avatar`, `Badge`.
+  - **[OUTDATED]** Convex hooks: `useQuery` and `api` from the old Convex backend.
+  - Hooks: `useUser`, `useLocalUser`.
+  - Local Database: `localDB`.
+  - Components: `MemoriesView`, `FamilyView`, `ExportData`, `ProtectedRoute`.
+- EXPORTS:
+  - `ProfilePage`: The main component, wrapped in `ProtectedRoute`.
+
+Data & State Management:
+- Manages local state for the current view (`overview`, `memories`, or `family`).
+- `useEffect` hook triggers `loadProfileData` to fetch memories and check-ins from `localDB`.
+- **[CONFLICT]** The component fetches data from two different sources:
+  1. `localDB` for memories and recent check-ins.
+  2. The old Convex database (`useQuery`) for conversations, family members, and check-ins stats.
+
+Critical System Connections:
+- UI System: Critical. Renders the main user profile interface.
+- Auth System: Critical. Uses `ProtectedRoute` and fetches user data via both `useUser` (old) and `useLocalUser` (new).
+- Memory System: Critical. This page is a gateway to managing memories and relationships. It reads data from both the old and new database systems.
+- Sync System: The `ExportData` component is the first step towards a manual sync/backup system.
+
+Actionable Items:
+- **High Priority:** This file is a prime example of the incomplete migration. It **must** be refactored to remove all `useQuery` calls to the Convex `api`.
+- All data (conversations, family members, check-ins) should be fetched exclusively from `localDB`.
+- The `useUser` hook (from `useUser.ts`, which likely uses Convex) should be replaced entirely with `useLocalUser`.
+- The logic for displaying stats needs to be updated to use the data fetched from the local database.

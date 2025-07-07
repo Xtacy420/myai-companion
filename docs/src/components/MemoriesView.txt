@@ -1,0 +1,44 @@
+File: src/components/MemoriesView.tsx
+Role: Memory Exploration and Management Interface
+
+Description:
+This component provides a dedicated view for users to browse, search, and manage the memories their AI has stored. It allows for detailed inspection and editing of individual memories. The component is currently broken as it relies on the old Convex backend.
+
+Key Responsibilities:
+- Displays a list of all memories stored for the user.
+- Provides a search bar to filter memories by keywords.
+- Allows filtering memories by type (e.g., Conversation, Event, Goal).
+- Renders each memory in a card format, showing its content, summary, importance, tags, and metadata.
+- Includes a dialog form to edit the details of a memory, including its content, summary, importance, and tags.
+- Allows for the deletion of memories.
+
+Imports & Exports:
+- IMPORTS:
+  - React hooks: `useState`, `useEffect`.
+  - **[OUTDATED]** Convex hooks: `useQuery`, `useMutation`, and `api`.
+  - UI Components: `Card`, `Badge`, `Input`, `Button`, `Dialog`, `Textarea`.
+  - Local Database: `localDB` (present but not used).
+- EXPORTS:
+  - `MemoriesView`: The main component.
+
+Data & State Management:
+- Manages local state for the search term, selected filter type, and the editing dialog.
+- **[MIGRATION REQUIRED]** All data fetching is done via `useQuery` from the **Convex backend**.
+  - `useQuery(api.memory.getMemoriesByUser, {})` fetches all memories.
+  - `useQuery(api.memory.searchMemories, ...)` performs searches on the backend.
+- **[MIGRATION REQUIRED]** All data manipulation is done via `useMutation` targeting the **Convex backend**.
+  - `updateMemory` and `deleteMemory` are Convex mutations.
+
+Critical System Connections:
+- UI System: Renders the primary interface for interacting with stored memories.
+- Auth System: Relies on the outdated Convex `userId` (`Id<"users">`).
+- Memory System: **[MIGRATION REQUIRED]** This component is completely tied to the old Convex memory system. It is non-functional in the current local-first architecture and needs a full rewrite.
+- Sync System: No direct connection.
+
+Actionable Items:
+- **High Priority:** This component must be completely migrated to the local-first architecture.
+- **Remove all Convex code:** All `useQuery` and `useMutation` hooks must be deleted.
+- **Implement Local Fetching:** Replace `useQuery` with `useEffect` and `useState` to fetch memories from `localDB.getMemoriesByUser(userId)`.
+- **Implement Local Search:** The search functionality needs to be implemented locally. This will involve fetching all memories and then filtering them on the client-side based on the `searchTerm`, or by using the `localDB.searchMemories` method.
+- **Implement Local Updates:** Replace the `updateMemory` and `deleteMemory` mutations with calls to `localDB.updateMemory` and `localDB.deleteMemory`.
+- The `userId` prop type needs to be changed from `Id<"users">` to a simple `string`.

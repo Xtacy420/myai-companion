@@ -1,0 +1,39 @@
+File: src/app/activity/page.tsx
+Role: User Activity Dashboard
+
+Description:
+This file renders the "Activity" page, which provides a comprehensive dashboard of the user's interactions with MyAi. It's designed to give users a high-level overview of their data, including mood trends, check-in streaks, and statistical summaries of their memories, conversations, and relationships.
+
+Key Responsibilities:
+- Displays statistical cards for key metrics (memories, conversations, check-ins, etc.).
+- Renders an activity feed, currently focused on check-ins.
+- Provides a toggleable view between the main dashboard and a more detailed "Check-ins" view.
+- Protects the route to ensure only authenticated users can access it.
+- Loads all necessary data from the local database (Dexie).
+
+Imports & Exports:
+- IMPORTS:
+  - React hooks: `useState`, `useEffect`.
+  - UI Components: `Button`, `Card`, `Badge`, `ScrollArea` from shadcn/ui.
+  - Icons: Various icons from `lucide-react`.
+  - Local Database: `localDB` for fetching user data.
+  - Components: `CheckInsView`, `ProtectedRoute`.
+  - Next.js: `Link` for navigation.
+- EXPORTS:
+  - `ActivityPage`: The main component, wrapped in `ProtectedRoute`.
+
+Data & State Management:
+- Manages local state for the current view (`dashboard` or `checkins`), loading status, and all user activity data (memories, conversations, check-ins, family, reminders).
+- `useEffect` hook triggers data loading from `localDB` when the component mounts or the `userId` changes.
+- `loadActivityData` function asynchronously fetches all required data in parallel using `Promise.all`.
+- Calculates derived stats like average mood and check-in streak.
+
+Critical System Connections:
+- UI System: Critical. Renders a major section of the application interface.
+- Auth System: Directly connected via `ProtectedRoute` and `useLocalUser`, ensuring only logged-in users can view the page.
+- Memory System: Critical. This page is a primary consumer and display for data from the local database, including memories, check-ins, and conversations.
+- Sync System: No direct connection.
+
+Actionable Items:
+- The `reminders` data is currently mocked (`Promise.resolve([])`). This needs to be connected to a real implementation in `localDB` once the reminder functionality is complete.
+- The dashboard stats are comprehensive, but the "Recent Activity" feed only shows check-ins. This could be expanded to show other activities like new memories or conversations.

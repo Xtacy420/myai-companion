@@ -1,0 +1,39 @@
+File: src/lib/database/database.ts
+Role: Local Database Core
+
+Description:
+This is the most critical file for the application's local-first architecture. It defines the entire database schema, sets up the Dexie.js instance, and provides a singleton class (`LocalDatabase`) with methods for all Create, Read, Update, and Delete (CRUD) operations. This file effectively serves as the application's backend.
+
+Key Responsibilities:
+- Defines the database schema using Dexie's syntax, creating tables for `users`, `conversations`, `characters`, `memory`, `checkIns`, `family`, `reminders`, `customCalendars`, `events`, and `lifeTemplates`.
+- Implements the `LocalDatabase` class as a singleton to ensure only one database connection is active.
+- Provides a comprehensive set of async methods for interacting with the database (e.g., `createUser`, `getConversationsByUser`, `updateEvent`, `deleteCharacter`).
+- Includes data encryption/decryption methods (`encrypt`, `decrypt`) using `CryptoJS` to secure the database when exporting.
+- Implements `exportDatabase` and `importDatabase` functions for user data backup and restore.
+- Handles database initialization and opening the connection.
+
+Imports & Exports:
+- IMPORTS:
+  - `Dexie`: The core library for the IndexedDB wrapper.
+  - `CryptoJS`: For AES encryption/decryption.
+  - `schema.ts`: Type definitions for all database tables.
+- EXPORTS:
+  - `MyAiDatabase`: The Dexie database class definition.
+  - `LocalDatabase`: The singleton class that provides the API for all database operations.
+  - `localDB`: An exported singleton instance of the `LocalDatabase` class, used by all other parts of the app.
+
+Data & State Management:
+- This file IS the data management layer for the entire application. It encapsulates all interactions with IndexedDB via Dexie.
+- It ensures data persistence across browser sessions.
+- It handles data relationships implicitly (e.g., deleting a character also deletes their conversations).
+
+Critical System Connections:
+- Auth System: Critical. The `users` table and its associated methods (`createUser`, `getUserByEmail`) are the foundation of the local authentication system.
+- Memory System: **Absolutely critical.** This file defines and manages the entire memory system.
+- Sync System: Critical. The `exportDatabase` and `importDatabase` functions are the core logic for any manual backup or cloud sync feature.
+- All other features (Chat, Calendar, Profile, etc.) are critically dependent on this file to function.
+
+Actionable Items:
+- **Sorting:** The file notes that Dexie's `orderBy` was replaced with client-side JavaScript `sort`. This is an important detail for performance considerations with large datasets.
+- **Encryption Key:** The `ENCRYPTION_KEY` is currently hardcoded with a note that it should be derived from the user's password in production. This is a **critical security improvement** that needs to be implemented.
+- **Database Size:** The `getDatabaseSize` method is currently a placeholder. Implementing a more accurate estimation could be useful for users.

@@ -1,0 +1,44 @@
+File: src/components/AIPersonalitySettings.tsx
+Role: AI Customization Component
+
+Description:
+This component provides a detailed interface for users to customize the personality and behavior of their AI companion. It allows for fine-tuning of the AI's tone, communication style, traits, and more. This component is currently using outdated Convex hooks and needs to be migrated to the local-first architecture.
+
+Key Responsibilities:
+- Renders a dialog (`Dialog`) for AI personality settings.
+- Provides options to configure the AI's tone (e.g., Empathetic, Analytical), style (e.g., Conversational, Concise), and specific personality traits.
+- Allows users to set the desired response length and emotional depth.
+- Includes a "Memory Focus" setting to guide the AI on what types of information to prioritize.
+- Fetches the current user settings and saves updated settings back to the database.
+
+Imports & Exports:
+- IMPORTS:
+  - React hooks: `useState`, `useEffect`.
+  - **[OUTDATED]** Convex hooks: `useQuery`, `useMutation`, and `api` for data fetching and updates.
+  - UI Components: `Button`, `Card`, `Input`, `Label`, `Select`, `Dialog`.
+  - Hooks: `useLocalUser` (present but not fully utilized).
+  - Local Database: `localDB` (present but not fully utilized).
+- EXPORTS:
+  - `AIPersonalitySettings`: The main component.
+
+Data & State Management:
+- Manages local state for the settings form (tone, style, traits, etc.) and dialog visibility.
+- `useEffect` hook populates the form with the user's current settings fetched from the **Convex database**.
+- `handleSave` function uses the `updateAIPersonality` mutation to save changes back to the **Convex database**.
+
+Critical System Connections:
+- UI System: Renders a key settings interface.
+- Auth System: Uses `userId` to fetch and update settings, but relies on the old Convex `userId` (`Id<"users">`).
+- Memory System: **[MIGRATION REQUIRED]** This component is critically tied to the old Convex backend. It needs to be completely refactored to:
+  1. Fetch user personality settings from `localDB`.
+  2. Save updated settings back to `localDB`.
+  3. The `User` schema in `localDB` must support storing these AI personality fields.
+- Sync System: No direct connection.
+
+Actionable Items:
+- **High Priority:** This component is non-functional in the local-first architecture. It must be completely migrated away from Convex.
+- Remove all `useQuery` and `useMutation` hooks from `convex/react`.
+- Replace data fetching with calls to `localDB.getUserById` or a similar method.
+- Replace data updates with calls to `localDB.updateUser`.
+- Ensure the `User` type in `lib/database/schema.ts` includes the `aiPersonality` object with all its nested fields (tone, style, traits, etc.).
+- Update the `userId` prop type to be a simple `string` instead of `Id<"users">`.

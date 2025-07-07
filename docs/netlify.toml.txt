@@ -1,0 +1,28 @@
+File: netlify.toml
+Role: Netlify Deployment Configuration
+
+Description:
+This file configures how the MyAi Companion application is built and deployed on Netlify, a popular hosting platform for web applications.
+
+Key Configurations:
+- `[build]` section:
+  - `command = "SKIP_ENV_VALIDATION=true bun run build"`: This is the command Netlify will run to build the project. It uses `bun` (a fast JavaScript runtime) and sets a `SKIP_ENV_VALIDATION` flag, which is common for Next.js projects to bypass environment variable checks during build.
+  - `publish = ".next"`: This tells Netlify that the output of the build command (the compiled Next.js app) will be in the `.next` directory.
+
+- `[build.environment]` section:
+  - `NODE_VERSION = "22"`: Specifies the version of Node.js to be used in the build environment.
+  - `NEXT_PUBLIC_CONVEX_URL = ""` & `CONVEX_DEPLOYMENT = ""`: **[OUTDATED]** These are leftover environment variables from the old Convex backend. They are now empty and can be removed.
+
+- `[[plugins]]` section:
+  - `package = "@netlify/plugin-nextjs"`: This is the most important part for a dynamic deployment. It tells Netlify to use its specialized Next.js plugin, which correctly handles server-side rendering, API routes, and other dynamic features of a Next.js application.
+
+- `[[redirects]]` section:
+  - `from = "/*"`, `to = "/index.html"`, `status = 200`: This is a standard redirect rule for a Single Page Application (SPA). However, for a dynamic Next.js app using the Netlify plugin, this rule is often unnecessary and can sometimes cause issues. The plugin typically handles routing automatically.
+
+Critical System Connections:
+- Build & Deployment System: **Absolutely critical.** This file defines the entire deployment process on Netlify.
+
+Actionable Items:
+- **High Priority: Deployment Conflict:** This file is configured for a **dynamic deployment** using the Next.js plugin, which conflicts with the `next.config.js` file's `output: 'export'` setting. To fix the deployment failures, the settings in `next.config.js` should be changed to support a dynamic deployment (i.e., remove the `output: 'export'` line).
+- **Cleanup:** The empty Convex environment variables should be removed to avoid confusion.
+- **Review Redirects:** The `[[redirects]]` rule should be evaluated. With the `@netlify/plugin-nextjs`, it's likely not needed and could potentially be removed. The plugin documentation should be checked for the recommended configuration.

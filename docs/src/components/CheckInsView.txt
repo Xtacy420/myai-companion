@@ -1,0 +1,39 @@
+File: src/components/CheckInsView.tsx
+Role: Daily Mood and Activity Tracker
+
+Description:
+This component provides a complete interface for users to perform daily "check-ins." It allows them to track their mood, emotions, activities, and reflections. The view includes a form for new check-ins and a dashboard displaying historical data and trends.
+
+Key Responsibilities:
+- Renders a form to create or edit a check-in, including:
+  - Date and a 1-10 mood slider.
+  - Selection of emotions and activities (with presets and custom entries).
+  - Text areas for notes, gratitude, goals, challenges, and highlights.
+- Displays a dashboard with key stats: check-in streak, 7-day average mood, and total check-ins.
+- Shows a scrollable list of recent check-ins.
+- Handles creating, updating, and deleting check-in records in the local database.
+
+Imports & Exports:
+- IMPORTS:
+  - React hooks: `useState`, `useEffect`.
+  - UI Components: `Button`, `Card`, `Dialog`, `Input`, `Textarea`, `Badge`.
+  - Icons: A variety of icons from `lucide-react` to enhance the UI.
+  - Local Database: `localDB` for all check-in CRUD operations.
+- EXPORTS:
+  - `CheckInsView`: The main component.
+
+Data & State Management:
+- Manages local state for the list of check-ins, loading status, dialog visibility, and the form data for a new/editing check-in.
+- `useEffect` hook loads the user's check-ins from `localDB`.
+- `handleSaveCheckIn` function creates or updates a check-in record in `localDB`.
+- Contains logic to calculate derived stats like the check-in streak and average mood from the fetched data.
+
+Critical System Connections:
+- UI System: Critical. Renders a core feature of the application.
+- Auth System: Relies on the parent component to pass the `userId`, ensuring check-ins are associated with the correct user.
+- Memory System: Critical. This component is a primary interface for creating and managing the user's check-in history, a key dataset in the local database.
+- Sync System: No direct connection.
+
+Actionable Items:
+- **Emotions Table:** The `handleSaveCheckIn` function has a commented-out section for creating `emotion` entries. It notes that this would require adding emotion-related operations to `localDB`. This feature is incomplete and needs to be implemented if detailed emotion tracking is desired.
+- The component is well-structured and appears to be fully migrated to the local-first architecture, with the exception of the noted emotion tracking feature.

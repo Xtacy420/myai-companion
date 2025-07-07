@@ -1,0 +1,41 @@
+File: src/components/RemindersView.tsx
+Role: Task and Reminder Management
+
+Description:
+This component provides a user interface for managing reminders and tasks. It allows users to create, view, edit, delete, and mark reminders as complete. The component is currently broken, containing conflicting code from both the old Convex backend and the new local-first architecture.
+
+Key Responsibilities:
+- Displays a list of reminders, filterable by status (all, pending, completed).
+- Provides a dialog form to create a new reminder or edit an existing one.
+- The form captures a title, description, due date/time, priority, and category.
+- Allows users to toggle the completion status of a reminder.
+- Shows a summary of upcoming reminders.
+
+Imports & Exports:
+- IMPORTS:
+  - React hooks: `useState`, `useEffect`.
+  - **[OUTDATED]** Convex hooks: `useQuery`, `useMutation`, and `api`.
+  - UI Components: `Card`, `Button`, `Dialog`, `Input`, `Textarea`, `Badge`.
+  - Local Database: `localDB`.
+- EXPORTS:
+  - `RemindersView`: The main component.
+
+Data & State Management:
+- **[CONFLICT]** The component fetches data from both Convex and localDB.
+  - It uses `useQuery` to fetch `reminders` and `upcomingReminders` from **Convex**.
+  - It also has `loadReminders`, `handleSaveReminder`, etc., functions designed to work with **localDB**.
+- Manages local state for the dialog form inputs and the status filter.
+
+Critical System Connections:
+- UI System: Renders the interface for task management.
+- Auth System: Relies on the outdated Convex `userId` (`Id<"users">`).
+- Memory System: **[MIGRATION REQUIRED]** This component is fundamentally broken due to its dual-backend nature. It attempts to read and write to both memory systems, which will cause data loss and bugs.
+- Sync System: No direct connection.
+
+Actionable Items:
+- **High Priority:** This component must be refactored immediately to use a single source of truth.
+- **Remove all Convex code:** All `useQuery` and `useMutation` hooks must be deleted.
+- **Unify Data Flow:** All data operations must go through `localDB` exclusively.
+- **Implement Local Fetching:** The component should fetch all reminders and calculate upcoming reminders using functions from `localDB`.
+- **Fix Handlers:** The `handleSubmit`, `handleDelete`, and `handleToggleStatus` functions need to be consolidated and rewritten to only use `localDB` methods.
+- Update the `userId` prop type to be a simple `string`.
