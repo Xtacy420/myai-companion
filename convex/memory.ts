@@ -17,10 +17,11 @@ export const createMemory = mutation({
     })),
   },
   handler: async (ctx, args) => {
-    const userId = await auth.getUserId(ctx);
-    if (!userId) {
+    const user = await auth.getAuthenticatedUser(ctx);
+    if (!user) {
       throw new Error("User not authenticated");
     }
+    const userId = user.sub;
 
     return await ctx.db.insert("memory", {
       userId,
@@ -41,10 +42,11 @@ export const getMemoriesByUser = query({
     limit: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
-    const userId = await auth.getUserId(ctx);
-    if (!userId) {
+    const user = await auth.getAuthenticatedUser(ctx);
+    if (!user) {
       return [];
     }
+    const userId = user.sub;
 
     let query = ctx.db
       .query("memory")
@@ -62,10 +64,11 @@ export const getMemoriesByUser = query({
 export const getMemory = query({
   args: { memoryId: v.id("memory") },
   handler: async (ctx, args) => {
-    const userId = await auth.getUserId(ctx);
-    if (!userId) {
+    const user = await auth.getAuthenticatedUser(ctx);
+    if (!user) {
       throw new Error("User not authenticated");
     }
+    const userId = user.sub;
 
     const memory = await ctx.db.get(args.memoryId);
 
@@ -94,10 +97,11 @@ export const updateMemory = mutation({
     })),
   },
   handler: async (ctx, args) => {
-    const userId = await auth.getUserId(ctx);
-    if (!userId) {
+    const user = await auth.getAuthenticatedUser(ctx);
+    if (!user) {
       throw new Error("User not authenticated");
     }
+    const userId = user.sub;
 
     const { memoryId, ...updates } = args;
     const memory = await ctx.db.get(memoryId);
@@ -118,10 +122,11 @@ export const updateMemory = mutation({
 export const deleteMemory = mutation({
   args: { memoryId: v.id("memory") },
   handler: async (ctx, args) => {
-    const userId = await auth.getUserId(ctx);
-    if (!userId) {
+    const user = await auth.getAuthenticatedUser(ctx);
+    if (!user) {
       throw new Error("User not authenticated");
     }
+    const userId = user.sub;
 
     const memory = await ctx.db.get(args.memoryId);
 
@@ -141,10 +146,11 @@ export const searchMemories = query({
     limit: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
-    const userId = await auth.getUserId(ctx);
-    if (!userId) {
+    const user = await auth.getAuthenticatedUser(ctx);
+    if (!user) {
       return [];
     }
+    const userId = user.sub;
 
     // Simple text search in content and summary
     const allMemories = await ctx.db
@@ -187,10 +193,11 @@ export const getMemoriesByType = query({
     limit: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
-    const userId = await auth.getUserId(ctx);
-    if (!userId) {
+    const user = await auth.getAuthenticatedUser(ctx);
+    if (!user) {
       return [];
     }
+    const userId = user.sub;
 
     let query = ctx.db
       .query("memory")
@@ -211,8 +218,8 @@ export const getMemoriesByType = query({
 export const getMemoryStats = query({
   args: {},
   handler: async (ctx) => {
-    const userId = await auth.getUserId(ctx);
-    if (!userId) {
+    const user = await auth.getAuthenticatedUser(ctx);
+    if (!user) {
       return {
         total: 0,
         byType: {},
@@ -220,6 +227,7 @@ export const getMemoryStats = query({
         totalTags: 0,
       };
     }
+    const userId = user.sub;
 
     const memories = await ctx.db
       .query("memory")

@@ -33,10 +33,11 @@ export const createEvent = mutation({
     currency: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    const userId = await auth.getUserId(ctx);
-    if (!userId) {
+    const user = await auth.getAuthenticatedUser(ctx);
+    if (!user) {
       throw new Error("User not authenticated");
     }
+    const userId = user.sub;
 
     // Verify calendar belongs to user
     const calendar = await ctx.db.get(args.calendarId);
@@ -78,10 +79,11 @@ export const getUserEvents = query({
     type: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    const userId = await auth.getUserId(ctx);
-    if (!userId) {
+    const user = await auth.getAuthenticatedUser(ctx);
+    if (!user) {
       return [];
     }
+    const userId = user.sub;
 
     let query = ctx.db
       .query("events")
@@ -120,10 +122,11 @@ export const getUpcomingEvents = query({
     limit: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
-    const userId = await auth.getUserId(ctx);
-    if (!userId) {
+    const user = await auth.getAuthenticatedUser(ctx);
+    if (!user) {
       return [];
     }
+    const userId = user.sub;
 
     const now = Date.now();
     const daysAhead = args.daysAhead || 7;
@@ -161,10 +164,11 @@ export const updateEvent = mutation({
     completedAt: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
-    const userId = await auth.getUserId(ctx);
-    if (!userId) {
+    const user = await auth.getAuthenticatedUser(ctx);
+    if (!user) {
       throw new Error("User not authenticated");
     }
+    const userId = user.sub;
 
     const { eventId, ...updates } = args;
     const event = await ctx.db.get(eventId);
@@ -196,10 +200,11 @@ export const updateEvent = mutation({
 export const deleteEvent = mutation({
   args: { eventId: v.id("events") },
   handler: async (ctx, args) => {
-    const userId = await auth.getUserId(ctx);
-    if (!userId) {
+    const user = await auth.getAuthenticatedUser(ctx);
+    if (!user) {
       throw new Error("User not authenticated");
     }
+    const userId = user.sub;
 
     const event = await ctx.db.get(args.eventId);
 
@@ -219,10 +224,11 @@ export const getEventsByType = query({
     limit: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
-    const userId = await auth.getUserId(ctx);
-    if (!userId) {
+    const user = await auth.getAuthenticatedUser(ctx);
+    if (!user) {
       return { events: [], stats: { total: 0, completed: 0, pending: 0 } };
     }
+    const userId = user.sub;
 
     const events = await ctx.db
       .query("events")
@@ -255,10 +261,11 @@ export const getBills = query({
     month: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
-    const userId = await auth.getUserId(ctx);
-    if (!userId) {
+    const user = await auth.getAuthenticatedUser(ctx);
+    if (!user) {
       return [];
     }
+    const userId = user.sub;
 
     let startDate, endDate;
     if (args.year && args.month) {
@@ -291,10 +298,11 @@ export const getBirthdays = query({
     daysAhead: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
-    const userId = await auth.getUserId(ctx);
-    if (!userId) {
+    const user = await auth.getAuthenticatedUser(ctx);
+    if (!user) {
       return [];
     }
+    const userId = user.sub;
 
     const now = Date.now();
     const daysAhead = args.daysAhead || 30;

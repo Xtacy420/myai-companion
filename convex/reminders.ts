@@ -11,10 +11,11 @@ export const createReminder = mutation({
     category: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    const userId = await auth.getUserId(ctx);
-    if (!userId) {
+    const user = await auth.getAuthenticatedUser(ctx);
+    if (!user) {
       throw new Error("User not authenticated");
     }
+    const userId = user.sub;
 
     return await ctx.db.insert("reminders", {
       userId,
@@ -32,10 +33,11 @@ export const createReminder = mutation({
 export const getRemindersByUser = query({
   args: { status: v.optional(v.string()) },
   handler: async (ctx, args) => {
-    const userId = await auth.getUserId(ctx);
-    if (!userId) {
+    const user = await auth.getAuthenticatedUser(ctx);
+    if (!user) {
       return [];
     }
+    const userId = user.sub;
 
     const query = ctx.db
       .query("reminders")
@@ -55,10 +57,11 @@ export const getRemindersByUser = query({
 export const getUpcomingReminders = query({
   args: { hoursAhead: v.optional(v.number()) },
   handler: async (ctx, args) => {
-    const userId = await auth.getUserId(ctx);
-    if (!userId) {
+    const user = await auth.getAuthenticatedUser(ctx);
+    if (!user) {
       return [];
     }
+    const userId = user.sub;
 
     const hoursAhead = args.hoursAhead || 24;
     const cutoff = Date.now() + (hoursAhead * 60 * 60 * 1000);
@@ -88,10 +91,11 @@ export const updateReminder = mutation({
     category: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    const userId = await auth.getUserId(ctx);
-    if (!userId) {
+    const user = await auth.getAuthenticatedUser(ctx);
+    if (!user) {
       throw new Error("User not authenticated");
     }
+    const userId = user.sub;
 
     const { reminderId, ...updates } = args;
     const reminder = await ctx.db.get(reminderId);
@@ -113,10 +117,11 @@ export const updateReminder = mutation({
 export const deleteReminder = mutation({
   args: { reminderId: v.id("reminders") },
   handler: async (ctx, args) => {
-    const userId = await auth.getUserId(ctx);
-    if (!userId) {
+    const user = await auth.getAuthenticatedUser(ctx);
+    if (!user) {
       throw new Error("User not authenticated");
     }
+    const userId = user.sub;
 
     const reminder = await ctx.db.get(args.reminderId);
 
@@ -131,10 +136,11 @@ export const deleteReminder = mutation({
 export const getRemindersByPriority = query({
   args: { priority: v.string() },
   handler: async (ctx, args) => {
-    const userId = await auth.getUserId(ctx);
-    if (!userId) {
+    const user = await auth.getAuthenticatedUser(ctx);
+    if (!user) {
       return [];
     }
+    const userId = user.sub;
 
     return await ctx.db
       .query("reminders")

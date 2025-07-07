@@ -29,10 +29,11 @@ export const createTemplate = mutation({
     }),
   },
   handler: async (ctx, args) => {
-    const userId = await auth.getUserId(ctx);
-    if (!userId) {
+    const user = await auth.getAuthenticatedUser(ctx);
+    if (!user) {
       throw new Error("User not authenticated");
     }
+    const userId = user.sub;
 
     return await ctx.db.insert("lifeTemplates", {
       userId,
@@ -54,10 +55,11 @@ export const getUserTemplates = query({
     isActive: v.optional(v.boolean()),
   },
   handler: async (ctx, args) => {
-    const userId = await auth.getUserId(ctx);
-    if (!userId) {
+    const user = await auth.getAuthenticatedUser(ctx);
+    if (!user) {
       return [];
     }
+    const userId = user.sub;
 
     let query = ctx.db
       .query("lifeTemplates")
@@ -108,10 +110,11 @@ export const updateTemplate = mutation({
     })),
   },
   handler: async (ctx, args) => {
-    const userId = await auth.getUserId(ctx);
-    if (!userId) {
+    const user = await auth.getAuthenticatedUser(ctx);
+    if (!user) {
       throw new Error("User not authenticated");
     }
+    const userId = user.sub;
 
     const { templateId, ...updates } = args;
     const template = await ctx.db.get(templateId);
@@ -133,10 +136,11 @@ export const updateTemplate = mutation({
 export const deleteTemplate = mutation({
   args: { templateId: v.id("lifeTemplates") },
   handler: async (ctx, args) => {
-    const userId = await auth.getUserId(ctx);
-    if (!userId) {
+    const user = await auth.getAuthenticatedUser(ctx);
+    if (!user) {
       throw new Error("User not authenticated");
     }
+    const userId = user.sub;
 
     const template = await ctx.db.get(args.templateId);
 
@@ -158,10 +162,11 @@ export const createEventsFromTemplate = mutation({
     numberOfOccurrences: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
-    const userId = await auth.getUserId(ctx);
-    if (!userId) {
+    const user = await auth.getAuthenticatedUser(ctx);
+    if (!user) {
       throw new Error("User not authenticated");
     }
+    const userId = user.sub;
 
     const template = await ctx.db.get(args.templateId);
     const calendar = await ctx.db.get(args.calendarId);
@@ -215,10 +220,11 @@ export const createEventsFromTemplate = mutation({
 export const initializeDefaultTemplates = mutation({
   args: {},
   handler: async (ctx) => {
-    const userId = await auth.getUserId(ctx);
-    if (!userId) {
+    const user = await auth.getAuthenticatedUser(ctx);
+    if (!user) {
       throw new Error("User not authenticated");
     }
+    const userId = user.sub;
 
     // Check if user already has templates
     const existingTemplates = await ctx.db

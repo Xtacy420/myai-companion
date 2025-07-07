@@ -1,6 +1,5 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
-import { auth } from "./auth";
 
 export const createCheckIn = mutation({
   args: {
@@ -15,10 +14,11 @@ export const createCheckIn = mutation({
     activities: v.optional(v.array(v.string())),
   },
   handler: async (ctx, args) => {
-    const userId = await auth.getUserId(ctx);
-    if (!userId) {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
       throw new Error("User not authenticated");
     }
+    const userId = identity.subject;
 
     // Check if check-in already exists for this date
     const existingCheckIn = await ctx.db
@@ -60,10 +60,11 @@ export const createCheckIn = mutation({
 export const getCheckInsByUser = query({
   args: { limit: v.optional(v.number()) },
   handler: async (ctx, args) => {
-    const userId = await auth.getUserId(ctx);
-    if (!userId) {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
       return [];
     }
+    const userId = identity.subject;
 
     const query = ctx.db
       .query("checkIns")
@@ -81,10 +82,11 @@ export const getCheckInsByUser = query({
 export const getCheckInByDate = query({
   args: { date: v.string() },
   handler: async (ctx, args) => {
-    const userId = await auth.getUserId(ctx);
-    if (!userId) {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
       return null;
     }
+    const userId = identity.subject;
 
     return await ctx.db
       .query("checkIns")
@@ -97,10 +99,11 @@ export const getCheckInByDate = query({
 export const getMoodTrend = query({
   args: { days: v.number() },
   handler: async (ctx, args) => {
-    const userId = await auth.getUserId(ctx);
-    if (!userId) {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
       return [];
     }
+    const userId = identity.subject;
 
     const checkIns = await ctx.db
       .query("checkIns")

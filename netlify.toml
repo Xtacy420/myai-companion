@@ -7,8 +7,8 @@
 
 [build.environment]
   NODE_VERSION = "22"
-  NEXT_PUBLIC_CONVEX_URL = ""
-  CONVEX_DEPLOYMENT = ""
+  NEXT_PUBLIC_CONVEX_URL = "https://myai-companion-e9c65.convex.cloud"
+  CONVEX_DEPLOYMENT = "myai-companion-e9c65"
 
 [[plugins]]
   package = "@netlify/plugin-nextjs"

@@ -1,6 +1,5 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
-import { auth } from "./auth";
 
 export const createCharacter = mutation({
   args: {
@@ -16,10 +15,11 @@ export const createCharacter = mutation({
     backstory: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    const userId = await auth.getUserId(ctx);
-    if (!userId) {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
       throw new Error("User not authenticated");
     }
+    const userId = identity.subject;
 
     const now = Date.now();
     return await ctx.db.insert("characters", {
@@ -40,10 +40,11 @@ export const createCharacter = mutation({
 export const getCharactersByUser = query({
   args: {},
   handler: async (ctx) => {
-    const userId = await auth.getUserId(ctx);
-    if (!userId) {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
       return [];
     }
+    const userId = identity.subject;
 
     return await ctx.db
       .query("characters")
@@ -56,10 +57,11 @@ export const getCharactersByUser = query({
 export const getCharacter = query({
   args: { characterId: v.id("characters") },
   handler: async (ctx, args) => {
-    const userId = await auth.getUserId(ctx);
-    if (!userId) {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
       throw new Error("User not authenticated");
     }
+    const userId = identity.subject;
 
     const character = await ctx.db.get(args.characterId);
 
@@ -88,10 +90,11 @@ export const updateCharacter = mutation({
     isActive: v.optional(v.boolean()),
   },
   handler: async (ctx, args) => {
-    const userId = await auth.getUserId(ctx);
-    if (!userId) {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
       throw new Error("User not authenticated");
     }
+    const userId = identity.subject;
 
     const { characterId, ...updates } = args;
     const character = await ctx.db.get(characterId);
@@ -110,10 +113,11 @@ export const updateCharacter = mutation({
 export const deleteCharacter = mutation({
   args: { characterId: v.id("characters") },
   handler: async (ctx, args) => {
-    const userId = await auth.getUserId(ctx);
-    if (!userId) {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
       throw new Error("User not authenticated");
     }
+    const userId = identity.subject;
 
     const character = await ctx.db.get(args.characterId);
 
@@ -142,10 +146,11 @@ export const createCharacterConversation = mutation({
     title: v.string(),
   },
   handler: async (ctx, args) => {
-    const userId = await auth.getUserId(ctx);
-    if (!userId) {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
       throw new Error("User not authenticated");
     }
+    const userId = identity.subject;
 
     // Verify character belongs to user
     const character = await ctx.db.get(args.characterId);
@@ -172,10 +177,11 @@ export const addCharacterMessage = mutation({
     content: v.string(),
   },
   handler: async (ctx, args) => {
-    const userId = await auth.getUserId(ctx);
-    if (!userId) {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
       throw new Error("User not authenticated");
     }
+    const userId = identity.subject;
 
     const conversation = await ctx.db.get(args.conversationId);
     if (!conversation || conversation.userId !== userId) {
@@ -200,10 +206,11 @@ export const addCharacterMessage = mutation({
 export const getCharacterConversations = query({
   args: { characterId: v.id("characters") },
   handler: async (ctx, args) => {
-    const userId = await auth.getUserId(ctx);
-    if (!userId) {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
       return [];
     }
+    const userId = identity.subject;
 
     return await ctx.db
       .query("characterConversations")
@@ -216,10 +223,11 @@ export const getCharacterConversations = query({
 export const getCharacterConversation = query({
   args: { conversationId: v.id("characterConversations") },
   handler: async (ctx, args) => {
-    const userId = await auth.getUserId(ctx);
-    if (!userId) {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
       throw new Error("User not authenticated");
     }
+    const userId = identity.subject;
 
     const conversation = await ctx.db.get(args.conversationId);
 
@@ -234,10 +242,11 @@ export const getCharacterConversation = query({
 export const incrementCharacterUsage = mutation({
   args: { characterId: v.id("characters") },
   handler: async (ctx, args) => {
-    const userId = await auth.getUserId(ctx);
-    if (!userId) {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
       throw new Error("User not authenticated");
     }
+    const userId = identity.subject;
 
     const character = await ctx.db.get(args.characterId);
     if (!character || character.userId !== userId) {

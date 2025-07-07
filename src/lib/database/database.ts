@@ -36,19 +36,26 @@ export class MyAiDatabase extends Dexie {
   constructor() {
     super('MyAiDB');
 
-    this.version(1).stores({
-      users: 'id, email, createdAt, lastActiveAt',
-      conversations: 'id, userId, title, createdAt, updatedAt',
-      characters: 'id, userId, name, isActive, createdAt, updatedAt',
-      characterConversations: 'id, userId, characterId, title, createdAt, updatedAt',
-      memory: 'id, userId, type, importance, createdAt, updatedAt',
-      checkIns: 'id, userId, date, mood, createdAt',
-      family: 'id, userId, name, relationship, birthday, createdAt, updatedAt',
-      reminders: 'id, userId, title, dueDate, priority, status, createdAt, completedAt',
-      customCalendars: 'id, userId, name, category, isDefault, isVisible, createdAt, updatedAt',
-      events: 'id, userId, calendarId, title, startDate, endDate, type, status, priority, createdAt, updatedAt',
-      lifeTemplates: 'id, userId, name, category, isActive, createdAt, updatedAt',
-      emotions: 'id, userId, name, intensity, timestamp, checkInId'
+    this.version(2).stores({
+        users: 'id, email, createdAt, lastActiveAt',
+        conversations: 'id, userId, title, createdAt, updatedAt',
+        characters: 'id, userId, name, isActive, createdAt, updatedAt',
+        characterConversations: 'id, userId, characterId, title, createdAt, updatedAt',
+        memory: 'id, userId, type, importance, createdAt, updatedAt',
+        checkIns: 'id, userId, date, mood, createdAt',
+        family: 'id, userId, name, relationship, birthday, createdAt, updatedAt',
+        reminders: 'id, userId, title, dueDate, priority, status, createdAt, completedAt',
+        customCalendars: 'id, userId, name, category, isDefault, isVisible, createdAt, updatedAt',
+        events: 'id, userId, calendarId, title, startDate, endDate, type, status, priority, createdAt, updatedAt',
+        lifeTemplates: 'id, userId, name, category, isActive, createdAt, updatedAt',
+        emotions: 'id, userId, name, intensity, timestamp, checkInId'
+    }).upgrade(tx => {
+      // Sample upgrade logic, adapt as needed
+      return tx.table("users").toCollection().modify(user => {
+        if (typeof user.lastActiveAt === 'undefined') {
+            user.lastActiveAt = Date.now();
+        }
+      });
     });
   }
 }
@@ -451,6 +458,12 @@ export class LocalDatabase {
     await this.db.events.clear();
     await this.db.lifeTemplates.clear();
     await this.db.emotions.clear();
+  }
+
+  async clearAllData(): Promise<void> {
+    await this.db.delete();
+    this.isInitialized = false; // Reset initialization state
+    this.db = new MyAiDatabase(); // Recreate database instance
   }
 
   private encrypt(data: string): string {

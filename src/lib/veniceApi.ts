@@ -19,7 +19,7 @@ class VeniceAPI {
 
   constructor() {
     // Venice API key provided by user
-    this.apiKey = "tu7_yLNMmD9G8Vz92B4p147jueUpN5uPhbn1qN7METEnhancements";
+    this.apiKey = process.env.NEXT_PUBLIC_VENICE_API_KEY || null;
   }
 
   async generateResponse(

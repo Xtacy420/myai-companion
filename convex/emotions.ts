@@ -11,10 +11,11 @@ export const recordEmotion = mutation({
     checkInId: v.optional(v.id("checkIns")),
   },
   handler: async (ctx, args) => {
-    const userId = await auth.getUserId(ctx);
-    if (!userId) {
+    const user = await auth.getAuthenticatedUser(ctx);
+    if (!user) {
       throw new Error("User not authenticated");
     }
+    const userId = user.sub;
 
     return await ctx.db.insert("emotions", {
       userId,
@@ -31,10 +32,11 @@ export const recordEmotion = mutation({
 export const getEmotionsByUser = query({
   args: { limit: v.optional(v.number()) },
   handler: async (ctx, args) => {
-    const userId = await auth.getUserId(ctx);
-    if (!userId) {
+    const user = await auth.getAuthenticatedUser(ctx);
+    if (!user) {
       return [];
     }
+    const userId = user.sub;
 
     const query = ctx.db
       .query("emotions")
@@ -52,10 +54,11 @@ export const getEmotionsByUser = query({
 export const getEmotionTrends = query({
   args: { days: v.number() },
   handler: async (ctx, args) => {
-    const userId = await auth.getUserId(ctx);
-    if (!userId) {
+    const user = await auth.getAuthenticatedUser(ctx);
+    if (!user) {
       return {};
     }
+    const userId = user.sub;
 
     const startDate = Date.now() - (args.days * 24 * 60 * 60 * 1000);
 
@@ -87,10 +90,11 @@ export const getEmotionTrends = query({
 export const getEmotionStats = query({
   args: { days: v.optional(v.number()) },
   handler: async (ctx, args) => {
-    const userId = await auth.getUserId(ctx);
-    if (!userId) {
+    const user = await auth.getAuthenticatedUser(ctx);
+    if (!user) {
       return [];
     }
+    const userId = user.sub;
 
     const days = args.days || 30;
     const startDate = Date.now() - (days * 24 * 60 * 60 * 1000);
@@ -124,10 +128,11 @@ export const getEmotionStats = query({
 export const deleteEmotion = mutation({
   args: { emotionId: v.id("emotions") },
   handler: async (ctx, args) => {
-    const userId = await auth.getUserId(ctx);
-    if (!userId) {
+    const user = await auth.getAuthenticatedUser(ctx);
+    if (!user) {
       throw new Error("User not authenticated");
     }
+    const userId = user.sub;
 
     const emotion = await ctx.db.get(args.emotionId);
 

@@ -18,10 +18,11 @@ export const createCalendar = mutation({
     })),
   },
   handler: async (ctx, args) => {
-    const userId = await auth.getUserId(ctx);
-    if (!userId) {
+    const user = await auth.getAuthenticatedUser(ctx);
+    if (!user) {
       throw new Error("User not authenticated");
     }
+    const userId = user.sub;
 
     return await ctx.db.insert("customCalendars", {
       userId,
@@ -43,10 +44,11 @@ export const createCalendar = mutation({
 export const getUserCalendars = query({
   args: {},
   handler: async (ctx) => {
-    const userId = await auth.getUserId(ctx);
-    if (!userId) {
+    const user = await auth.getAuthenticatedUser(ctx);
+    if (!user) {
       return [];
     }
+    const userId = user.sub;
 
     return await ctx.db
       .query("customCalendars")
@@ -73,10 +75,11 @@ export const updateCalendar = mutation({
     })),
   },
   handler: async (ctx, args) => {
-    const userId = await auth.getUserId(ctx);
-    if (!userId) {
+    const user = await auth.getAuthenticatedUser(ctx);
+    if (!user) {
       throw new Error("User not authenticated");
     }
+    const userId = user.sub;
 
     const { calendarId, ...updates } = args;
     const calendar = await ctx.db.get(calendarId);
@@ -98,10 +101,11 @@ export const updateCalendar = mutation({
 export const deleteCalendar = mutation({
   args: { calendarId: v.id("customCalendars") },
   handler: async (ctx, args) => {
-    const userId = await auth.getUserId(ctx);
-    if (!userId) {
+    const user = await auth.getAuthenticatedUser(ctx);
+    if (!user) {
       throw new Error("User not authenticated");
     }
+    const userId = user.sub;
 
     const calendar = await ctx.db.get(args.calendarId);
 
@@ -136,10 +140,11 @@ export const deleteCalendar = mutation({
 export const initializeDefaultCalendars = mutation({
   args: {},
   handler: async (ctx) => {
-    const userId = await auth.getUserId(ctx);
-    if (!userId) {
+    const user = await auth.getAuthenticatedUser(ctx);
+    if (!user) {
       throw new Error("User not authenticated");
     }
+    const userId = user.sub;
 
     // Check if user already has calendars
     const existingCalendars = await ctx.db

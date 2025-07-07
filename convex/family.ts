@@ -25,10 +25,11 @@ export const addFamilyMember = mutation({
     })),
   },
   handler: async (ctx, args) => {
-    const userId = await auth.getUserId(ctx);
-    if (!userId) {
+    const user = await auth.getAuthenticatedUser(ctx);
+    if (!user) {
       throw new Error("User not authenticated");
     }
+    const userId = user.sub;
 
     const now = Date.now();
     return await ctx.db.insert("family", {
@@ -49,10 +50,11 @@ export const addFamilyMember = mutation({
 export const getFamilyMembers = query({
   args: {},
   handler: async (ctx) => {
-    const userId = await auth.getUserId(ctx);
-    if (!userId) {
+    const user = await auth.getAuthenticatedUser(ctx);
+    if (!user) {
       return [];
     }
+    const userId = user.sub;
 
     return await ctx.db
       .query("family")
@@ -86,10 +88,11 @@ export const updateFamilyMember = mutation({
     })),
   },
   handler: async (ctx, args) => {
-    const userId = await auth.getUserId(ctx);
-    if (!userId) {
+    const user = await auth.getAuthenticatedUser(ctx);
+    if (!user) {
       throw new Error("User not authenticated");
     }
+    const userId = user.sub;
 
     const { familyMemberId, ...updates } = args;
     const member = await ctx.db.get(familyMemberId);
@@ -108,10 +111,11 @@ export const updateFamilyMember = mutation({
 export const deleteFamilyMember = mutation({
   args: { familyMemberId: v.id("family") },
   handler: async (ctx, args) => {
-    const userId = await auth.getUserId(ctx);
-    if (!userId) {
+    const user = await auth.getAuthenticatedUser(ctx);
+    if (!user) {
       throw new Error("User not authenticated");
     }
+    const userId = user.sub;
 
     const member = await ctx.db.get(args.familyMemberId);
 
@@ -126,10 +130,11 @@ export const deleteFamilyMember = mutation({
 export const getUpcomingBirthdays = query({
   args: { daysAhead: v.optional(v.number()) },
   handler: async (ctx, args) => {
-    const userId = await auth.getUserId(ctx);
-    if (!userId) {
+    const user = await auth.getAuthenticatedUser(ctx);
+    if (!user) {
       return [];
     }
+    const userId = user.sub;
 
     const familyMembers = await ctx.db
       .query("family")
