@@ -1,0 +1,23 @@
+[images]
+  remote_images = ["https://source.unsplash.com/.*", "https://images.unsplash.com/.*", "https://ext.same-assets.com/.*", "https://ugc.same-assets.com/.*"]
+
+[build]
+  command = "SKIP_ENV_VALIDATION=true TSC_COMPILE_ON_ERROR=true DISABLE_ESLINT_PLUGIN=true bun run build"
+  publish = ".next"
+
+[build.environment]
+  NODE_VERSION = "22"
+  TSC_COMPILE_ON_ERROR = "true"
+  DISABLE_ESLINT_PLUGIN = "true"
+
+[[plugins]]
+  package = "@netlify/plugin-nextjs"
+
+[functions]
+  node_bundler = "esbuild"
+
+# Redirects for client-side routing
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
